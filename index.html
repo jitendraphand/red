@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homi Bhabha Class 6 – Electricity & Magnetism Quiz</title>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --danger: #d93025;
+      --success: #1e8e3e;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: #202124;
+      line-height: 1.5;
+      padding: 16px;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      color: #5f6368;
+      font-size: 0.95rem;
+    }
+    .timer-bar {
+      background: #e8eaed;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .timer-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 100%;
+      transition: width 1s linear;
+    }
+    .timer-fill.warning { background: #f9ab00; }
+    .timer-fill.danger { background: var(--danger); }
+    .timer-text {
+      text-align: right;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      margin-bottom: 16px;
+    }
+    .q-num {
+      font-size: 0.85rem;
+      color: #5f6368;
+      margin-bottom: 8px;
+    }
+    .question {
+      font-size: 1.15rem;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .option {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border: 2px solid #dadce0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #fff;
+    }
+    .option:hover {
+      border-color: var(--primary);
+      background: #e8f0fe;
+    }
+    .option.selected {
+      border-color: var(--primary);
+      background: #e8f0fe;
+    }
+    .option input { margin-right: 12px; }
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .btn:disabled {
+      background: #dadce0;
+      cursor: not-allowed;
+    }
+    .btn:hover:not(:disabled) { background: #1557b0; }
+    .progress {
+      text-align: center;
+      color: #5f6368;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+    }
+    #results {
+      display: none;
+    }
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(var(--success) 0% var(--pct), #e8eaed var(--pct) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      position: relative;
+    }
+    .score-circle span {
+      background: white;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .result-item {
+      padding: 12px;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .correct { color: var(--success); font-weight: 600; }
+    .wrong { color: var(--danger); }
+    .explanation {
+      font-size: 0.9rem;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: #80868b;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Dr. Homi Bhabha Balvaidnyanik</h1>
+      <div class="subtitle">Class 6 • Electricity & Magnetism • 50 Questions</div>
+    </header>
+
+    <div id="quiz">
+      <div class="progress" id="progress">Question 1 of 50</div>
+      <div class="timer-text" id="timerText">60s</div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+      <div class="card" id="questionCard">
+        <div class="q-num" id="qNum">Question 1</div>
+        <div class="question" id="questionText"></div>
+        <div class="options" id="options"></div>
+        <button class="btn" id="nextBtn" disabled>Next</button>
+      </div>
+    </div>
+
+    <div id="results">
+      <div class="card">
+        <h2 style="text-align:center; margin-bottom:8px;">Quiz Complete!</h2>
+        <div class="score-circle" id="scoreCircle"><span id="scoreText">0/50</span></div>
+        <p style="text-align:center; color:#5f6368; margin-bottom:20px;" id="scoreMsg"></p>
+        <div id="review"></div>
+        <div style="text-align:center; margin-top:20px;">
+          <button class="btn" onclick="location.reload()">Try Again</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Practice set for Dr. Homi Bhabha Balvaidnyanik Competition (Class 6)<br>
+      Based on Maharashtra State Board syllabus – Electricity & Magnetism
+    </footer>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        q: "What is the SI unit of electric current?",
+        options: ["Volt", "Ohm", "Ampere", "Watt"],
+        answer: 2,
+        exp: "Electric current is measured in amperes (A)."
+      },
+      {
+        q: "Which of the following is a good conductor of electricity?",
+        options: ["Plastic", "Rubber", "Copper", "Wood"],
+        answer: 2,
+        exp: "Copper is a metal and a good conductor due to free electrons."
+      },
+      {
+        q: "Materials that do not allow electric current to pass through them are called:",
+        options: ["Conductors", "Insulators", "Semiconductors", "Magnets"],
+        answer: 1,
+        exp: "Insulators such as rubber, plastic and dry wood do not allow current to flow."
+      },
+      {
+        q: "A simple electric circuit consists of a cell, a bulb and connecting wires. For the bulb to glow, the circuit must be:",
+        options: ["Open", "Closed", "Broken", "Disconnected"],
+        answer: 1,
+        exp: "A closed circuit provides a complete path for the current to flow."
+      },
+      {
+        q: "The energy conversion in a dry cell (battery) is:",
+        options: ["Electrical to chemical", "Chemical to electrical", "Light to electrical", "Heat to electrical"],
+        answer: 1,
+        exp: "A battery converts chemical energy stored in it into electrical energy."
+      },
+      {
+        q: "Like poles of two magnets:",
+        options: ["Attract each other", "Repel each other", "Neither attract nor repel", "First attract then repel"],
+        answer: 1,
+        exp: "Like poles (N-N or S-S) repel, opposite poles attract."
+      },
+      {
+        q: "Opposite poles of two magnets:",
+        options: ["Repel each other", "Attract each other", "Cancel each other", "Do not interact"],
+        answer: 1,
+        exp: "North pole of one magnet attracts the south pole of another."
+      },
+      {
+        q: "A freely suspended bar magnet always points in the:",
+        options: ["East-West direction", "North-South direction", "North-East direction", "Any direction"],
+        answer: 1,
+        exp: "A freely suspended magnet aligns itself in the north-south direction."
+      },
+      {
+        q: "The end of a magnet that points towards the geographic north is called the:",
+        options: ["South pole", "North pole", "East pole", "West pole"],
+        answer: 1,
+        exp: "The north-seeking pole of a magnet is called the north pole."
+      },
+      {
+        q: "Which of the following is a natural magnet?",
+        options: ["Iron bar", "Lodestone", "Steel needle", "Alnico"],
+        answer: 1,
+        exp: "Lodestone (magnetite) is a naturally occurring magnet."
+      },
+      {
+        q: "Materials that are attracted by a magnet are called:",
+        options: ["Non-magnetic materials", "Magnetic materials", "Insulators", "Conductors"],
+        answer: 1,
+        exp: "Magnetic materials such as iron, nickel and cobalt are attracted by magnets."
+      },
+      {
+        q: "Which of the following is a non-magnetic material?",
+        options: ["Iron", "Nickel", "Plastic", "Cobalt"],
+        answer: 2,
+        exp: "Plastic is non-magnetic and is not attracted by a magnet."
+      },
+      {
+        q: "An electromagnet is a:",
+        options: ["Permanent magnet", "Temporary magnet", "Natural magnet", "Bar magnet only"],
+        answer: 1,
+        exp: "An electromagnet is temporary; it is magnetic only while current flows."
+      },
+      {
+        q: "To make an electromagnet we need an iron nail, insulated copper wire and a:",
+        options: ["Magnet", "Battery (cell)", "Glass rod", "Wooden stick"],
+        answer: 1,
+        exp: "A cell provides the electric current needed to magnetise the iron nail."
+      },
+      {
+        q: "When the circuit of an electromagnet is broken, the iron nail:",
+        options: ["Remains magnetic", "Loses its magnetism", "Becomes stronger", "Attracts non-magnetic materials"],
+        answer: 1,
+        exp: "Electromagnets lose magnetism as soon as the current is switched off."
+      },
+      {
+        q: "Which device uses an electromagnet?",
+        options: ["Electric heater", "Electric bell", "Incandescent bulb", "Fuse"],
+        answer: 1,
+        exp: "An electric bell uses an electromagnet to strike the gong repeatedly."
+      },
+      {
+        q: "The SI unit of electrical resistance is:",
+        options: ["Ampere", "Volt", "Ohm", "Watt"],
+        answer: 2,
+        exp: "Resistance is measured in ohms (Ω)."
+      },
+      {
+        q: "Which of the following pairs correctly shows a conductor and an insulator?",
+        options: ["Copper and iron", "Silver and rubber", "Aluminium and copper", "Iron and steel"],
+        answer: 1,
+        exp: "Silver is a conductor while rubber is an insulator."
+      },
+      {
+        q: "Electric current flows through a circuit only when the switch is:",
+        options: ["Open", "Closed", "Broken", "Removed"],
+        answer: 1,
+        exp: "A closed switch completes the circuit and allows current to flow."
+      },
+      {
+        q: "The filament of an electric bulb is usually made of:",
+        options: ["Copper", "Tungsten", "Iron", "Aluminium"],
+        answer: 1,
+        exp: "Tungsten has a high melting point and glows when current passes through it."
+      },
+      {
+        q: "What happens when a magnet is cut into two pieces?",
+        options: ["Both pieces lose magnetism", "One piece becomes north pole only", "Two complete magnets are formed", "Magnetism is destroyed completely"],
+        answer: 2,
+        exp: "Each piece becomes an independent magnet with its own north and south poles."
+      },
+      {
+        q: "The strength of a magnet is maximum at its:",
+        options: ["Centre", "Poles", "Middle of the length", "Any point equally"],
+        answer: 1,
+        exp: "Magnetic force is concentrated at the poles of a magnet."
+      },
+      {
+        q: "Which of the following can destroy the magnetism of a magnet?",
+        options: ["Keeping it carefully", "Heating it strongly", "Storing with a keeper", "Using it gently"],
+        answer: 1,
+        exp: "Strong heating, hammering or dropping can demagnetise a magnet."
+      },
+      {
+        q: "A compass needle is a small magnet that is free to rotate. It is used to find:",
+        options: ["Temperature", "Direction", "Speed", "Mass"],
+        answer: 1,
+        exp: "A compass indicates the north-south direction."
+      },
+      {
+        q: "In an electric bell, electrical energy is converted into:",
+        options: ["Light energy", "Sound energy", "Chemical energy", "Heat energy only"],
+        answer: 1,
+        exp: "The electromagnet causes the hammer to strike the gong, producing sound."
+      },
+      {
+        q: "Which of the following is an insulator?",
+        options: ["Graphite", "Silver", "Dry wood", "Iron"],
+        answer: 2,
+        exp: "Dry wood does not allow electric current to pass through it."
+      },
+      {
+        q: "The human body is a:",
+        options: ["Good insulator", "Good conductor of electricity", "Non-magnetic only", "Semiconductor"],
+        answer: 1,
+        exp: "The human body conducts electricity, which is why we can get an electric shock."
+      },
+      {
+        q: "Pure water is a poor conductor of electricity, but tap water conducts because it contains:",
+        options: ["Only oxygen", "Dissolved salts", "Only hydrogen", "Air bubbles"],
+        answer: 1,
+        exp: "Dissolved salts make ordinary water a conductor."
+      },
+      {
+        q: "When an iron nail is placed near a magnet, it becomes a temporary magnet. This is called:",
+        options: ["Demagnetisation", "Induced magnetism", "Permanent magnetism", "Electrostatic induction"],
+        answer: 1,
+        exp: "Magnetic materials acquire temporary magnetism when placed near a magnet."
+      },
+      {
+        q: "Which mixture is commonly used to make strong permanent magnets?",
+        options: ["Sand and iron", "Alnico (aluminium, nickel, cobalt)", "Plastic and rubber", "Wood and glass"],
+        answer: 1,
+        exp: "Alnico is an alloy used to make permanent magnets."
+      },
+      {
+        q: "The space around a magnet in which its magnetic force can be felt is called the:",
+        options: ["Magnetic pole", "Magnetic field", "Magnetic keeper", "Magnetic axis"],
+        answer: 1,
+        exp: "The region around a magnet where its influence is felt is the magnetic field."
+      },
+      {
+        q: "In a closed electric circuit, the flow of electric current is from the:",
+        options: ["Negative to positive terminal of the cell (conventionally)", "Positive to negative terminal of the cell (conventionally)", "Random direction", "Only through the bulb"],
+        answer: 1,
+        exp: "By convention, current flows from the positive terminal to the negative terminal."
+      },
+      {
+        q: "Which of the following devices works on the principle of an electromagnet?",
+        options: ["Electric heater", "Crane used to lift scrap iron", "Candle", "Thermometer"],
+        answer: 1,
+        exp: "Electromagnets in cranes are used to lift and drop scrap iron."
+      },
+      {
+        q: "A plastic bottle is rubbed with nylon cloth and brought near the hand. The hair on the hand rises. This is due to:",
+        options: ["Magnetic force", "Electrostatic force", "Gravitational force", "Muscular force"],
+        answer: 1,
+        exp: "Rubbing produces static electricity (electrostatic force) which attracts hair."
+      },
+      {
+        q: "The unit used to measure electric potential difference (voltage) is:",
+        options: ["Ampere", "Volt", "Ohm", "Joule"],
+        answer: 1,
+        exp: "Potential difference is measured in volts (V)."
+      },
+      {
+        q: "Which of the following statements is correct about magnets?",
+        options: ["A magnet has only one pole", "Magnetic force is strongest at the centre", "Like poles repel and unlike poles attract", "All metals are magnetic"],
+        answer: 2,
+        exp: "The fundamental property of magnets is that like poles repel and unlike poles attract."
+      },
+      {
+        q: "In which of the following devices is an electromagnet NOT used?",
+        options: ["Electric bell", "Washing machine", "Electric heater", "Refrigerator"],
+        answer: 2,
+        exp: "An electric heater works on the heating effect of current, not an electromagnet."
+      },
+      {
+        q: "The filament of a bulb glows because electrical energy is converted into:",
+        options: ["Only chemical energy", "Light and heat energy", "Only magnetic energy", "Mechanical energy"],
+        answer: 1,
+        exp: "In a bulb, electrical energy is converted into light and heat."
+      },
+      {
+        q: "Which of the following is attracted by both poles of a magnet?",
+        options: ["Another magnet's like pole", "Iron filings", "A glass rod", "A plastic ruler"],
+        answer: 1,
+        exp: "Iron filings are magnetic materials and are attracted by both poles of a magnet."
+      },
+      {
+        q: "A magnet keeper is used to:",
+        options: ["Increase the strength of a magnet", "Protect the magnet from losing magnetism", "Make the magnet temporary", "Find the direction"],
+        answer: 1,
+        exp: "A soft iron keeper is placed across the poles to prevent loss of magnetism."
+      },
+      {
+        q: "When two bar magnets are placed with their like poles facing each other, they:",
+        options: ["Attract", "Repel", "Stick permanently", "Lose magnetism"],
+        answer: 1,
+        exp: "Like poles always repel each other."
+      },
+      {
+        q: "Which of the following materials can be used to make the core of an electromagnet?",
+        options: ["Copper", "Soft iron", "Plastic", "Glass"],
+        answer: 1,
+        exp: "Soft iron is used as the core because it is easily magnetised and demagnetised."
+      },
+      {
+        q: "Electric wires are usually covered with plastic or rubber because:",
+        options: ["They look attractive", "Plastic and rubber are good conductors", "Plastic and rubber are insulators", "They are cheaper than metals"],
+        answer: 2,
+        exp: "Insulating covers prevent electric shocks and short circuits."
+      },
+      {
+        q: "The discovery of magnets is associated with a mineral called:",
+        options: ["Bauxite", "Magnetite (lodestone)", "Haematite", "Pyrite"],
+        answer: 1,
+        exp: "Lodestone is a natural magnetic mineral (magnetite)."
+      },
+      {
+        q: "In a torch, the battery provides electrical energy which is converted into:",
+        options: ["Sound energy", "Light energy", "Chemical energy", "Magnetic energy"],
+        answer: 1,
+        exp: "The bulb in a torch converts electrical energy into light (and some heat)."
+      },
+      {
+        q: "Which of the following is true about the poles of a magnet?",
+        options: ["They can be separated", "North pole can exist alone", "Poles always exist in pairs", "A magnet can have three poles"],
+        answer: 2,
+        exp: "Magnetic poles always exist in pairs; they cannot be separated."
+      },
+      {
+        q: "A copper wire is wound around an iron nail and connected to a cell. The nail becomes a magnet. This magnet is called:",
+        options: ["Permanent magnet", "Electromagnet", "Natural magnet", "Bar magnet"],
+        answer: 1,
+        exp: "This arrangement produces an electromagnet."
+      },
+      {
+        q: "Which of the following statements about electric current is correct?",
+        options: ["It can flow through an open circuit", "It is the flow of electric charge", "It is measured in ohms", "It flows only in metals"],
+        answer: 1,
+        exp: "Electric current is the flow of electric charges through a conductor."
+      },
+      {
+        q: "The mariner's compass works on the principle of:",
+        options: ["Electrostatic force", "Magnetic property of the Earth", "Gravitational force", "Heating effect"],
+        answer: 1,
+        exp: "The compass needle aligns with the Earth's magnetic field."
+      },
+      {
+        q: "Which energy transformation takes place in a microphone?",
+        options: ["Sound to electrical", "Electrical to sound", "Light to electrical", "Chemical to sound"],
+        answer: 0,
+        exp: "A microphone converts sound energy into electrical energy."
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let answers = [];
+    let timer;
+    let timeLeft = 60;
+    let selected = null;
+
+    const progressEl = document.getElementById('progress');
+    const timerText = document.getElementById('timerText');
+    const timerFill = document.getElementById('timerFill');
+    const qNum = document.getElementById('qNum');
+    const questionText = document.getElementById('questionText');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('nextBtn');
+    const quizEl = document.getElementById('quiz');
+    const resultsEl = document.getElementById('results');
+
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 60;
+      timerFill.style.width = '100%';
+      timerFill.className = 'timer-fill';
+      updateTimer();
+      timer = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          selectAnswer(null); // auto-advance on timeout
+          setTimeout(nextQuestion, 400);
+        }
+      }, 1000);
+    }
+
+    function updateTimer() {
+      timerText.textContent = timeLeft + 's';
+      const pct = (timeLeft / 60) * 100;
+      timerFill.style.width = pct + '%';
+      if (timeLeft <= 10) timerFill.className = 'timer-fill danger';
+      else if (timeLeft <= 20) timerFill.className = 'timer-fill warning';
+      else timerFill.className = 'timer-fill';
+    }
+
+    function renderQuestion() {
+      const q = questions[current];
+      progressEl.textContent = `Question ${current + 1} of ${questions.length}`;
+      qNum.textContent = `Question ${current + 1}`;
+      questionText.textContent = q.q;
+      optionsEl.innerHTML = '';
+      selected = null;
+      nextBtn.disabled = true;
+
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option';
+        div.innerHTML = `<input type="radio" name="opt" value="${i}"> ${opt}`;
+        div.onclick = () => selectAnswer(i);
+        optionsEl.appendChild(div);
+      });
+
+      startTimer();
+    }
+
+    function selectAnswer(idx) {
+      clearInterval(timer);
+      selected = idx;
+      const opts = optionsEl.querySelectorAll('.option');
+      opts.forEach((o, i) => {
+        o.classList.toggle('selected', i === idx);
+        const radio = o.querySelector('input');
+        if (radio) radio.checked = (i === idx);
+      });
+      nextBtn.disabled = false;
+      if (idx === null) {
+        // timeout case
+        answers.push(null);
+      }
+    }
+
+    function nextQuestion() {
+      if (selected !== null) {
+        answers.push(selected);
+        if (selected === questions[current].answer) score++;
+      } else if (answers.length <= current) {
+        answers.push(null);
+      }
+
+      current++;
+      if (current < questions.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    nextBtn.onclick = nextQuestion;
+
+    function showResults() {
+      quizEl.style.display = 'none';
+      resultsEl.style.display = 'block';
+      const pct = Math.round((score / questions.length) * 100);
+      document.getElementById('scoreText').textContent = `${score}/50`;
+      document.getElementById('scoreCircle').style.setProperty('--pct', pct + '%');
+      document.getElementById('scoreMsg').textContent =
+        pct >= 80 ? 'Excellent! You have a strong grasp of the topic.' :
+        pct >= 60 ? 'Good effort! Review the topics you missed.' :
+        'Keep practising! Focus on conductors, magnets and circuits.';
+
+      const review = document.getElementById('review');
+      review.innerHTML = '<h3 style="margin-bottom:12px;">Review</h3>';
+      questions.forEach((q, i) => {
+        const userAns = answers[i];
+        const correct = userAns === q.answer;
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.innerHTML = `
+          <div><strong>Q${i+1}.</strong> ${q.q}</div>
+          <div class="${correct ? 'correct' : 'wrong'}">
+            Your answer: ${userAns === null ? 'Time up' : q.options[userAns]} ${correct ? '✓' : '✗'}
+          </div>
+          ${!correct ? `<div class="correct">Correct: ${q.options[q.answer]}</div>` : ''}
+          <div class="explanation">${q.exp}</div>
+        `;
+        review.appendChild(div);
+      });
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
