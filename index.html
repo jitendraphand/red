@@ -21,12 +21,12 @@
       padding: 16px;
     }
     .container {
-      max-width: 720px;
+      max-width: 800px;
       margin: 0 auto;
     }
     header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     h1 {
       font-size: 1.6rem;
@@ -42,7 +42,7 @@
       height: 8px;
       border-radius: 4px;
       overflow: hidden;
-      margin: 12px 0;
+      margin: 8px 0 12px;
     }
     .timer-fill {
       height: 100%;
@@ -61,7 +61,7 @@
     .card {
       background: var(--card);
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.12);
       margin-bottom: 16px;
     }
@@ -73,7 +73,7 @@
     .question {
       font-size: 1.15rem;
       font-weight: 500;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .options {
       display: flex;
@@ -99,32 +99,73 @@
       background: #e8f0fe;
     }
     .option input { margin-right: 12px; }
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
     .btn {
       display: inline-block;
       background: var(--primary);
       color: white;
       border: none;
-      padding: 12px 28px;
+      padding: 10px 20px;
       border-radius: 8px;
       font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
-      margin-top: 16px;
     }
     .btn:disabled {
       background: #dadce0;
       cursor: not-allowed;
     }
     .btn:hover:not(:disabled) { background: #1557b0; }
+    .btn.secondary { background: #5f6368; }
+    .btn.secondary:hover:not(:disabled) { background: #3c4043; }
+    .btn.submit { background: var(--success); }
+    .btn.submit:hover { background: #137333; }
     .progress {
       text-align: center;
       color: #5f6368;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       font-size: 0.9rem;
     }
-    #results {
-      display: none;
+    .q-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+      justify-content: center;
     }
+    .q-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #dadce0;
+      background: #fff;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .q-btn.current {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    .q-btn.answered {
+      background: #e8f0fe;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .q-btn.answered.current {
+      background: var(--primary);
+      color: white;
+    }
+    #results { display: none; }
     .score-circle {
       width: 140px;
       height: 140px;
@@ -134,7 +175,6 @@
       align-items: center;
       justify-content: center;
       margin: 20px auto;
-      position: relative;
     }
     .score-circle span {
       background: white;
@@ -148,7 +188,7 @@
       font-weight: 700;
     }
     .result-item {
-      padding: 12px;
+      padding: 12px 0;
       border-bottom: 1px solid #e8eaed;
     }
     .correct { color: var(--success); font-weight: 600; }
@@ -177,11 +217,18 @@
       <div class="progress" id="progress">Question 1 of 50</div>
       <div class="timer-text" id="timerText">60s</div>
       <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+
+      <div class="q-nav" id="qNav"></div>
+
       <div class="card" id="questionCard">
         <div class="q-num" id="qNum">Question 1</div>
         <div class="question" id="questionText"></div>
         <div class="options" id="options"></div>
-        <button class="btn" id="nextBtn" disabled>Next</button>
+        <div class="nav-buttons">
+          <button class="btn secondary" id="prevBtn">← Back</button>
+          <button class="btn" id="nextBtn">Next →</button>
+          <button class="btn submit" id="submitBtn">Submit</button>
+        </div>
       </div>
     </div>
 
@@ -305,7 +352,7 @@
         q: "The SI unit of electrical resistance is:",
         options: ["Ampere", "Volt", "Ohm", "Watt"],
         answer: 2,
-        exp: "Resistance is measured in ohms (Ω)."
+        exp: "Resistance is measured in ohms (\u03a9)."
       },
       {
         q: "Which of the following pairs correctly shows a conductor and an insulator?",
@@ -508,11 +555,9 @@
     ];
 
     let current = 0;
-    let score = 0;
-    let answers = [];
-    let timer;
+    let answers = Array(questions.length).fill(null);
+    let timer = null;
     let timeLeft = 60;
-    let selected = null;
 
     const progressEl = document.getElementById('progress');
     const timerText = document.getElementById('timerText');
@@ -520,28 +565,52 @@
     const qNum = document.getElementById('qNum');
     const questionText = document.getElementById('questionText');
     const optionsEl = document.getElementById('options');
+    const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
     const quizEl = document.getElementById('quiz');
     const resultsEl = document.getElementById('results');
+    const qNav = document.getElementById('qNav');
+
+    function buildNav() {
+      qNav.innerHTML = '';
+      for (let i = 0; i < questions.length; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'q-btn';
+        btn.textContent = i + 1;
+        btn.onclick = () => goTo(i);
+        qNav.appendChild(btn);
+      }
+      updateNav();
+    }
+
+    function updateNav() {
+      const btns = qNav.querySelectorAll('.q-btn');
+      btns.forEach((btn, i) => {
+        btn.classList.toggle('current', i === current);
+        btn.classList.toggle('answered', answers[i] !== null);
+      });
+    }
 
     function startTimer() {
       clearInterval(timer);
       timeLeft = 60;
       timerFill.style.width = '100%';
       timerFill.className = 'timer-fill';
-      updateTimer();
+      updateTimerDisplay();
       timer = setInterval(() => {
         timeLeft--;
-        updateTimer();
+        updateTimerDisplay();
         if (timeLeft <= 0) {
           clearInterval(timer);
-          selectAnswer(null); // auto-advance on timeout
-          setTimeout(nextQuestion, 400);
+          if (current < questions.length - 1) {
+            goTo(current + 1);
+          }
         }
       }, 1000);
     }
 
-    function updateTimer() {
+    function updateTimerDisplay() {
       timerText.textContent = timeLeft + 's';
       const pct = (timeLeft / 60) * 100;
       timerFill.style.width = pct + '%';
@@ -556,57 +625,58 @@
       qNum.textContent = `Question ${current + 1}`;
       questionText.textContent = q.q;
       optionsEl.innerHTML = '';
-      selected = null;
-      nextBtn.disabled = true;
 
       q.options.forEach((opt, i) => {
         const div = document.createElement('div');
-        div.className = 'option';
-        div.innerHTML = `<input type="radio" name="opt" value="${i}"> ${opt}`;
+        div.className = 'option' + (answers[current] === i ? ' selected' : '');
+        div.innerHTML = `<input type="radio" name="opt" value="${i}" ${answers[current] === i ? 'checked' : ''}> ${opt}`;
         div.onclick = () => selectAnswer(i);
         optionsEl.appendChild(div);
       });
 
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === questions.length - 1;
+      updateNav();
       startTimer();
     }
 
     function selectAnswer(idx) {
-      clearInterval(timer);
-      selected = idx;
+      answers[current] = idx;
       const opts = optionsEl.querySelectorAll('.option');
       opts.forEach((o, i) => {
         o.classList.toggle('selected', i === idx);
         const radio = o.querySelector('input');
         if (radio) radio.checked = (i === idx);
       });
-      nextBtn.disabled = false;
-      if (idx === null) {
-        // timeout case
-        answers.push(null);
-      }
+      updateNav();
     }
 
-    function nextQuestion() {
-      if (selected !== null) {
-        answers.push(selected);
-        if (selected === questions[current].answer) score++;
-      } else if (answers.length <= current) {
-        answers.push(null);
-      }
-
-      current++;
-      if (current < questions.length) {
-        renderQuestion();
-      } else {
-        showResults();
-      }
+    function goTo(index) {
+      if (index < 0 || index >= questions.length) return;
+      current = index;
+      renderQuestion();
     }
 
-    nextBtn.onclick = nextQuestion;
+    prevBtn.onclick = () => goTo(current - 1);
+    nextBtn.onclick = () => goTo(current + 1);
+    submitBtn.onclick = () => {
+      const unanswered = answers.filter(a => a === null).length;
+      if (unanswered > 0) {
+        if (!confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+      }
+      showResults();
+    };
 
     function showResults() {
+      clearInterval(timer);
       quizEl.style.display = 'none';
       resultsEl.style.display = 'block';
+
+      let score = 0;
+      answers.forEach((ans, i) => {
+        if (ans === questions[i].answer) score++;
+      });
+
       const pct = Math.round((score / questions.length) * 100);
       document.getElementById('scoreText').textContent = `${score}/50`;
       document.getElementById('scoreCircle').style.setProperty('--pct', pct + '%');
@@ -625,7 +695,7 @@
         div.innerHTML = `
           <div><strong>Q${i+1}.</strong> ${q.q}</div>
           <div class="${correct ? 'correct' : 'wrong'}">
-            Your answer: ${userAns === null ? 'Time up' : q.options[userAns]} ${correct ? '✓' : '✗'}
+            Your answer: ${userAns === null ? 'Not answered' : q.options[userAns]} ${correct ? '\u2713' : '\u2717'}
           </div>
           ${!correct ? `<div class="correct">Correct: ${q.options[q.answer]}</div>` : ''}
           <div class="explanation">${q.exp}</div>
@@ -634,6 +704,7 @@
       });
     }
 
+    buildNav();
     renderQuestion();
   </script>
 </body>
